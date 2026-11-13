@@ -88,6 +88,29 @@ Suggested request: *Plot the library size of every sample four ways: a
 histogram, the same histogram on a log scale, the samples ranked from smallest
 to largest, and library size by visit. Use both tables.*
 
+Start with the histogram of sequencing depth. Sequencing depth is just the
+total number of reads in a sample — the library size — so we add up every
+column of each count table:
+
+```{r depth-histogram}
+# colSums() adds up each column, i.e. all reads in one sample.
+# species[-1] means "all columns except the first" (the species-name column).
+depth <- bind_rows(
+  tibble(table = "species", sample_id = names(species)[-1],
+         reads = colSums(species[-1])),
+  tibble(table = "genes",   sample_id = names(genes)[-1],
+         reads = colSums(genes[-1]))
+)
+
+ggplot(depth, aes(reads)) +
+  geom_histogram(bins = 40, fill = "firebrick", colour = "white") +
+  facet_wrap(~ table, scales = "free") +
+  labs(x = "Reads per sample (sequencing depth)", y = "Number of samples")
+```
+
+Check it yourself: `sum(species$P001_week_18)` in the console should equal
+`depth$reads` for that sample, and `nrow(depth)` should be 942.
+
 - Which view makes the 438-read sample obvious, and which hides it? Which would you put in a paper?
   - *Your answer:*
 
